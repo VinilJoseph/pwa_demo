@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f4">
+  <title>FACTS — Company Dashboard</title>
+  <style>
+    :root {
+      --page: #f5f6f4;
+      --surface: #fff;
+      --ink: #202a32;
+      --muted: #6d787e;
+      --border: #e3e7e4;
+      --green: #36745b;
+      --green-light: #eaf2ed;
+      --amber: #9a6a27;
+      --amber-light: #f8f0e3;
+      --red: #a44e4b;
+      --red-light: #f8eceb;
+      --shadow: 0 2px 8px rgba(31, 45, 37, .045);
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--page); }
+    button, input { font: inherit; }
+    button:focus-visible, a:focus-visible, input:focus-visible {
+      outline: 3px solid rgba(54, 116, 91, .28);
+      outline-offset: 2px;
+    }
+    [hidden] { display: none !important; }
+
+    .shell { max-width: 1160px; margin: 0 auto; padding: 24px 28px 56px; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 20px; border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand-mark {
+      display: grid; place-items: center; width: 38px; height: 38px;
+      border-radius: 9px; color: white; background: #315f4b;
+      font-size: 13px; font-weight: 800; letter-spacing: -.04em;
+    }
+    .brand-name { font-size: 14px; font-weight: 750; letter-spacing: .08em; }
+    .brand-caption { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .profile-button {
+      display: flex; align-items: center; gap: 9px; padding: 5px 10px 5px 5px;
+      border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+      cursor: pointer;
+    }
+    .avatar {
+      display: grid; place-items: center; width: 31px; height: 31px;
+      border-radius: 50%; color: #315f4b; background: #e6eee9;
+      font-size: 11px; font-weight: 750;
+    }
+    .profile-name { font-size: 12px; font-weight: 650; }
+    .chevron { width: 14px; color: var(--muted); }
+
+    .intro { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin: 27px 0 19px; }
+    h1 { margin: 0; font-size: clamp(24px, 4vw, 30px); font-weight: 700; letter-spacing: -.035em; }
+    .intro p { margin: 7px 0 0; color: var(--muted); font-size: 13px; }
+    .date-label { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+    .search-wrap { position: relative; margin-bottom: 26px; }
+    .search-icon { position: absolute; top: 50%; left: 13px; width: 17px; height: 17px; color: #7b8580; transform: translateY(-50%); }
+    .search-input {
+      width: 100%; height: 44px; padding: 0 14px 0 40px; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--ink); background: var(--surface);
+    }
+    .search-input::placeholder { color: #89928e; }
+    .search-input:focus { border-color: #8eaf9c; outline: none; }
+
+    .section { margin-top: 27px; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 13px; }
+    .section-head h2 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -.015em; }
+    .section-subtitle { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .text-button {
+      padding: 6px 0; border: 0; color: var(--green); background: transparent;
+      font-size: 12px; font-weight: 650; cursor: pointer;
+    }
+    .text-button:hover { text-decoration: underline; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .stat-card {
+      min-height: 99px; padding: 15px 16px; border: 1px solid var(--border);
+      border-radius: 9px; background: var(--surface); box-shadow: var(--shadow);
+    }
+    .stat-label { color: var(--muted); font-size: 12px; }
+    .stat-value { margin-top: 9px; font-size: 26px; font-weight: 720; letter-spacing: -.04em; }
+    .stat-detail { margin-top: 3px; color: var(--muted); font-size: 11px; }
+
+    .employee-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .employee-card {
+      display: flex; align-items: center; gap: 12px; min-width: 0; padding: 14px;
+      border: 1px solid var(--border); border-radius: 9px; background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .employee-avatar {
+      display: grid; flex: 0 0 auto; place-items: center; width: 41px; height: 41px;
+      border-radius: 50%; color: #355f4d; background: #e8efea; font-size: 12px; font-weight: 750;
+    }
+    .employee-info { min-width: 0; flex: 1; }
+    .employee-name { overflow: hidden; font-size: 13px; font-weight: 680; text-overflow: ellipsis; white-space: nowrap; }
+    .employee-role { overflow: hidden; margin-top: 4px; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .employee-meta { margin-top: 5px; color: #818b86; font-size: 10px; }
+    .status { padding: 5px 8px; border-radius: 5px; font-size: 10px; font-weight: 650; white-space: nowrap; }
+    .status.present, .status.available, .status.active { color: #356a50; background: var(--green-light); }
+    .status.leave, .status.inactive, .status.review { color: var(--amber); background: var(--amber-light); }
+    .status.absent { color: var(--red); background: var(--red-light); }
+    .status.in-use { color: #5a6870; background: #edf0f1; }
+
+    .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .panel { min-width: 0; padding: 17px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); box-shadow: var(--shadow); }
+    .vehicle-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+    .vehicle-metric { padding: 10px 8px; border-radius: 6px; background: #f6f7f5; }
+    .vehicle-metric strong { display: block; font-size: 18px; font-weight: 700; }
+    .vehicle-metric span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .item-list { display: grid; gap: 11px; margin-top: 15px; }
+    .list-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-width: 0; }
+    .row-copy { min-width: 0; }
+    .row-title { overflow: hidden; font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+    .row-detail { margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .client-total { display: flex; align-items: baseline; gap: 7px; margin: 0 0 14px; }
+    .client-total strong { font-size: 25px; letter-spacing: -.04em; }
+    .client-total span { color: var(--muted); font-size: 11px; }
+    .client-initials {
+      display: grid; flex: 0 0 auto; place-items: center; width: 34px; height: 34px;
+      margin-right: 9px; border-radius: 7px; color: #426551; background: #eaf0eb;
+      font-size: 10px; font-weight: 750;
+    }
+    .client-copy { display: flex; align-items: center; min-width: 0; }
+
+    .cheque-count {
+      padding: 5px 8px; border-radius: 5px; color: #805642;
+      background: #f4eee8; font-size: 10px; font-weight: 650;
+    }
+    .deck-area { max-width: 900px; margin: 0 auto; }
+    .deck { position: relative; height: 294px; touch-action: pan-y; }
+
+    /* Wide ticket layout: preview, cheque details, expiry panel, and perforated footer. */
+    .cheque-card {
+      position: absolute; inset: 0; display: grid; grid-template-rows: 1fr 58px;
+      overflow: hidden; border: 1px solid #dfe4e0; border-radius: 12px;
+      background: var(--surface); box-shadow: 0 5px 16px rgba(31, 45, 37, .08);
+      transition: transform .28s ease, opacity .28s ease; user-select: none;
+    }
+    .cheque-card:nth-child(2) { transform: translateY(8px) scale(.985); z-index: -1; background: #f7f8f6; }
+    .cheque-card:nth-child(3) { transform: translateY(15px) scale(.97); z-index: -2; background: #eef0ed; }
+    .ticket-main {
+      display: grid; grid-template-columns: 176px minmax(0, 1fr) 132px;
+      gap: 22px; min-height: 0; padding: 20px 22px;
+    }
+    .preview-wrap {
+      position: relative; display: grid; place-items: center; min-width: 0; min-height: 0;
+      overflow: hidden; border: 1px solid var(--border); border-radius: 7px; background: #f3f5f2;
+    }
+    .preview-label {
+      position: absolute; z-index: 1; top: 7px; left: 7px; padding: 4px 6px;
+      border-radius: 4px; color: #47544d; background: rgba(255,255,255,.9);
+      font-size: 9px; font-weight: 650;
+    }
+    .cheque-preview { width: 100%; height: 100%; object-fit: contain; }
+    .preview-placeholder {
+      display: grid; align-content: center; justify-items: center; gap: 9px;
+      width: 100%; height: 100%; padding: 15px; color: #6f7973; text-align: center;
+    }
+    .preview-placeholder svg { width: 28px; height: 28px; color: #7d8b82; }
+    .preview-placeholder span { max-width: 130px; font-size: 10px; line-height: 1.45; }
+    .ticket-details { align-self: center; min-width: 0; }
+    .ticket-brandline { display: flex; align-items: center; gap: 8px; }
+    .ticket-company { font-size: 19px; font-weight: 780; letter-spacing: .06em; }
+    .pending-label { padding: 4px 7px; border-radius: 4px; color: #805642; background: #f4eee8; font-size: 9px; font-weight: 700; }
+    .ticket-description { margin: 5px 0 14px; color: var(--muted); font-size: 11px; }
+    .ticket-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 18px; }
+    .ticket-field-label { color: #7b8580; font-size: 9px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+    .ticket-field-value { overflow: hidden; margin-top: 4px; font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+    .ticket-expiry {
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      gap: 9px; padding-left: 17px; border-left: 1px dashed #d8deda;
+    }
+    .calendar { width: 66px; overflow: hidden; border: 1px solid #e8d7d5; border-radius: 7px; background: white; text-align: center; }
+    .calendar-month { padding: 5px; color: white; background: #a85b54; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+    .calendar-day { padding-top: 4px; font-size: 24px; font-weight: 750; line-height: 1.1; }
+    .calendar-weekday { padding: 2px 0 6px; color: var(--muted); font-size: 9px; }
+    .countdown { color: var(--red); font-size: 10px; font-weight: 700; text-align: center; }
+
+    .ticket-footer {
+      position: relative; display: flex; justify-content: space-between; align-items: center;
+      gap: 16px; padding: 9px 22px; border-top: 1px dashed #cfd6d1; background: #fcfdfb;
+    }
+    .ticket-footer::before, .ticket-footer::after {
+      content: ""; position: absolute; top: -9px; width: 16px; height: 16px;
+      border: 1px solid #dfe4e0; border-radius: 50%; background: var(--page);
+    }
+    .ticket-footer::before { left: -9px; }
+    .ticket-footer::after { right: -9px; }
+    .barcode-area { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .barcode {
+      width: 145px; height: 31px; flex: 0 0 auto;
+      background: repeating-linear-gradient(90deg,
+        #27332d 0 2px, transparent 2px 4px, #27332d 4px 5px,
+        transparent 5px 8px, #27332d 8px 11px, transparent 11px 13px,
+        #27332d 13px 14px, transparent 14px 17px);
+    }
+    .barcode-ref { color: var(--muted); font-size: 9px; letter-spacing: .08em; }
+    .drive-link {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 8px 11px; border: 1px solid var(--border); border-radius: 6px;
+      color: var(--green); background: white; font-size: 10px; font-weight: 650;
+      text-decoration: none; white-space: nowrap;
+    }
+    .drive-link:hover { background: #f5f8f5; }
+    .drive-link svg { width: 13px; height: 13px; }
+
+    .deck-controls { display: flex; justify-content: center; align-items: center; gap: 13px; margin-top: 12px; }
+    .round-control {
+      display: grid; place-items: center; width: 33px; height: 33px; border: 1px solid var(--border);
+      border-radius: 50%; background: white; cursor: pointer;
+    }
+    .round-control:hover { border-color: #a8b8ac; background: #f4f7f4; }
+    .round-control svg { width: 15px; height: 15px; }
+    .deck-position { min-width: 40px; color: var(--muted); font-size: 11px; text-align: center; }
+    .swipe-hint { margin: 7px 0 0; color: #87918c; font-size: 10px; text-align: center; }
+
+    .empty-state, .no-results {
+      padding: 18px; border: 1px dashed #cfd7d1; border-radius: 8px;
+      color: var(--muted); background: white; font-size: 12px; text-align: center;
+    }
+    .no-results { display: none; margin: 12px 0; }
+    .toast {
+      position: fixed; z-index: 5; right: 18px; bottom: 18px; padding: 11px 14px;
+      border-radius: 7px; color: white; background: #293a31; font-size: 12px;
+      opacity: 0; pointer-events: none; transform: translateY(6px); transition: .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 760px) {
+      .shell { padding: 20px 18px 42px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .content-grid { grid-template-columns: 1fr; }
+      .ticket-main { grid-template-columns: 145px minmax(0, 1fr) 112px; gap: 15px; padding: 17px; }
+    }
+    @media (max-width: 560px) {
+      .shell { padding: 16px 14px 36px; }
+      .profile-name, .chevron { display: none; }
+      .intro { align-items: flex-start; margin-top: 22px; }
+      .date-label { padding-top: 5px; font-size: 10px; }
+      .employee-grid { grid-template-columns: 1fr; }
+      .vehicle-summary { grid-template-columns: repeat(2, 1fr); }
+      .panel { padding: 14px; }
+
+      .deck { height: 390px; }
+      .cheque-card { grid-template-rows: 1fr 54px; }
+      .ticket-main {
+        grid-template-columns: 100px minmax(0, 1fr);
+        grid-template-rows: minmax(112px, 1fr) auto;
+        gap: 13px; padding: 14px;
+      }
+      .preview-wrap { grid-column: 1; grid-row: 1 / 3; min-height: 125px; }
+      .ticket-details { grid-column: 2; grid-row: 1; align-self: center; }
+      .ticket-company { font-size: 17px; }
+      .ticket-description { margin-bottom: 10px; font-size: 10px; }
+      .ticket-fields { grid-template-columns: 1fr 1fr; gap: 9px 8px; }
+      .ticket-field-value { font-size: 11px; }
+      .ticket-expiry {
+        grid-column: 2; grid-row: 2; flex-direction: row; justify-content: flex-start;
+        gap: 10px; padding: 10px 0 0; border-top: 1px dashed #d8deda; border-left: 0;
+      }
+      .calendar { width: 55px; }
+      .calendar-day { font-size: 20px; }
+      .ticket-footer { padding: 8px 13px; gap: 8px; }
+      .barcode { width: 84px; height: 26px; }
+      .barcode-area { gap: 6px; }
+      .barcode-ref { font-size: 8px; }
+      .drive-link { gap: 5px; padding: 7px 8px; font-size: 9px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">F</div>
+        <div>
+          <div class="brand-name">FACTS</div>
+          <div class="brand-caption">Company dashboard</div>
+        </div>
+      </div>
+      <button class="profile-button" id="profileButton" type="button" aria-label="Open profile menu">
+        <span class="avatar">JD</span>
+        <span class="profile-name">Jordan Davis</span>
+        <svg class="chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7.5 5 5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </header>
+
+    <section aria-labelledby="page-title">
+      <div class="intro">
+        <div>
+          <h1 id="page-title">Company Overview</h1>
+          <p>Company activity and updates for today.</p>
+        </div>
+        <div class="date-label" id="todayLabel"></div>
+      </div>
+      <label class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input class="search-input" id="globalSearch" type="search" placeholder="Search employees, vehicles, clients…" aria-label="Search dashboard">
+      </label>
+    </section>
+
+    <div class="no-results" id="noResults" role="status">No matches found. Try a different search.</div>
+
+    <section class="section searchable-section" id="peopleSection" aria-labelledby="people-title">
+      <div class="section-head">
+        <div>
+          <h2 id="people-title">People overview</h2>
+          <p class="section-subtitle">Attendance summary</p>
+        </div>
+        <button class="text-button placeholder-button" type="button">View attendance</button>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+    </section>
+
+    <section class="section searchable-section" id="employeesSection" aria-labelledby="employees-title">
+      <div class="section-head">
+        <div>
+          <h2 id="employees-title">Employees</h2>
+          <p class="section-subtitle">A few people from your team</p>
+        </div>
+        <button class="text-button placeholder-button" type="button">View all employees</button>
+      </div>
+      <div class="employee-grid" id="employeeGrid"></div>
+    </section>
+
+    <div class="section content-grid">
+      <section class="panel searchable-section" id="vehiclesSection" aria-labelledby="vehicles-title">
+        <div class="section-head">
+          <div>
+            <h2 id="vehicles-title">Vehicles</h2>
+            <p class="section-subtitle">Fleet status at a glance</p>
+          </div>
+          <button class="text-button placeholder-button" type="button">View vehicles</button>
+        </div>
+        <div class="vehicle-summary" id="vehicleSummary"></div>
+        <div class="item-list" id="vehicleList"></div>
+      </section>
+
+      <section class="panel searchable-section" id="clientsSection" aria-labelledby="clients-title">
+        <div class="section-head">
+          <div>
+            <h2 id="clients-title">Clients</h2>
+            <p class="section-subtitle">Client relationships</p>
+          </div>
+          <button class="text-button placeholder-button" type="button">View all clients</button>
+        </div>
+        <div class="client-total"><strong id="clientCount"></strong><span>total clients</span></div>
+        <div class="item-list" id="clientList"></div>
+      </section>
+    </div>
+
+    <section class="section searchable-section" id="chequesSection" aria-labelledby="cheques-title">
+      <div class="section-head">
+        <div>
+          <h2 id="cheques-title">Pending cheques</h2>
+          <p class="section-subtitle">Upcoming expiry dates</p>
+        </div>
+        <span class="cheque-count" id="chequeCount"></span>
+      </div>
+      <div id="chequeContent"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Replace the sample dashboard details with your company data.
+    // For a Drive preview, set driveFileId to the ID from the Google Drive file URL.
+    // The Drive file must be accessible to the person viewing this page.
+    // You can also set previewImageUrl to a directly accessible image URL.
+    const dashboardData = {
+      people: [
+        { label: "Employees", value: 48, detail: "Across all teams" },
+        { label: "Present today", value: 41, detail: "85% of employees" },
+        { label: "Absent today", value: 3, detail: "Needs follow-up" },
+        { label: "On leave", value: 4, detail: "Approved leave" }
+      ],
+      employees: [
+        { name: "Amara Johnson", role: "Operations Manager", department: "Operations", status: "Present", initials: "AJ" },
+        { name: "Ethan Williams", role: "Finance Officer", department: "Finance", status: "Present", initials: "EW" },
+        { name: "Maya Chen", role: "People Coordinator", department: "Human Resources", status: "On leave", initials: "MC" },
+        { name: "Noah Patel", role: "Fleet Supervisor", department: "Logistics", status: "Absent", initials: "NP" }
+      ],
+      vehicles: [
+        { name: "Van 01", detail: "Toyota HiAce · FCT-204", status: "Available", category: "available" },
+        { name: "Sedan 03", detail: "Honda Accord · FCT-118", status: "In use", category: "in-use" },
+        { name: "Truck 02", detail: "Ford Transit · FCT-331", status: "In use", category: "in-use" },
+        { name: "Van 04", detail: "Nissan NV200 · FCT-087", status: "Inactive", category: "inactive" }
+      ],
+      clients: [
+        { name: "Northstar Logistics", detail: "Operations · Since 2022", status: "Active", initials: "NL" },
+        { name: "Evergreen Group", detail: "Facilities · Since 2023", status: "Active", initials: "EG" },
+        { name: "Blue Peak Partners", detail: "Consulting · Since 2024", status: "In review", initials: "BP" }
+      ],
+      clientsTotal: 12,
+      cheques: [
+        {
+          company: "FACTS", payee: "Northstar Logistics", amount: "$8,450.00",
+          daysLeft: 5, reference: "CHQ-2048",
+          driveUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/HK_Cheque_Sample.png/960px-HK_Cheque_Sample.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20100623085950",
+          driveFileId: "", previewImageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/HK_Cheque_Sample.png/960px-HK_Cheque_Sample.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20100623085950"
+        },
+        {
+          company: "FACTS", payee: "Evergreen Group", amount: "$3,280.00",
+          daysLeft: 12, reference: "CHQ-2051",
+          driveUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/HK_Cheque_Sample.png/960px-HK_Cheque_Sample.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20100623085950",
+          driveFileId: "", previewImageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/HK_Cheque_Sample.png/960px-HK_Cheque_Sample.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20100623085950"
+        },
+        {
+          company: "FACTS", payee: "Blue Peak Partners", amount: "$5,100.00",
+          daysLeft: 19, reference: "CHQ-2057",
+          driveUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/HK_Cheque_Sample.png/960px-HK_Cheque_Sample.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20100623085950",
+          driveFileId: "", previewImageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/HK_Cheque_Sample.png/960px-HK_Cheque_Sample.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail&_=20100623085950"
+        }
+      ]
+    };
+
+    const icons = {
+      external: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+      left: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14.5 5-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      right: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9.5 5 7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      document: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3.8h7l4 4V20H7a2 2 0 0 1-2-2V5.8a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.5"/><path d="M14 4v4h4M8 12h8M8 15h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
+    };
+
+    const $ = selector => document.querySelector(selector);
+    let currentCheque = 0;
+    let toastTimer;
+
+    function renderPeople() {
+      $("#statsGrid").innerHTML = dashboardData.people.map(item => `
+        <article class="stat-card" data-search="${item.label.toLowerCase()}">
+          <div class="stat-label">${item.label}</div>
+          <div class="stat-value">${item.value}</div>
+          <div class="stat-detail">${item.detail}</div>
+        </article>
+      `).join("");
+    }
+
+    function renderEmployees() {
+      $("#employeeGrid").innerHTML = dashboardData.employees.map(employee => {
+        const statusClass = employee.status === "Present" ? "present"
+          : employee.status === "Absent" ? "absent" : "leave";
+        return `
+          <article class="employee-card" data-search="${(employee.name + " " + employee.role + " " + employee.department + " " + employee.status).toLowerCase()}">
+            <div class="employee-avatar" aria-hidden="true">${employee.initials}</div>
+            <div class="employee-info">
+              <div class="employee-name">${employee.name}</div>
+              <div class="employee-role">${employee.role}</div>
+              <div class="employee-meta">${employee.department}</div>
+            </div>
+            <span class="status ${statusClass}">${employee.status}</span>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderVehicles() {
+      const vehicles = dashboardData.vehicles;
+      const metrics = [
+        ["Total", vehicles.length],
+        ["Available", vehicles.filter(v => v.category === "available").length],
+        ["Active", vehicles.filter(v => v.category === "in-use").length],
+        ["Inactive", vehicles.filter(v => v.category === "inactive").length]
+      ];
+      $("#vehicleSummary").innerHTML = metrics.map(([label, value]) =>
+        `<div class="vehicle-metric"><strong>${value}</strong><span>${label}</span></div>`
+      ).join("");
+
+      $("#vehicleList").innerHTML = vehicles.map(vehicle => `
+        <div class="list-row vehicle-item" data-search="${(vehicle.name + " " + vehicle.detail + " " + vehicle.status).toLowerCase()}">
+          <div class="row-copy">
+            <div class="row-title">${vehicle.name}</div>
+            <div class="row-detail">${vehicle.detail}</div>
+          </div>
+          <span class="status ${vehicle.category}">${vehicle.status}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderClients() {
+      $("#clientCount").textContent = dashboardData.clientsTotal;
+      $("#clientList").innerHTML = dashboardData.clients.map(client => {
+        const statusClass = client.status === "Active" ? "active" : "review";
+        return `
+          <div class="list-row client-item" data-search="${(client.name + " " + client.detail + " " + client.status).toLowerCase()}">
+            <div class="client-copy">
+              <div class="client-initials" aria-hidden="true">${client.initials}</div>
+              <div class="row-copy">
+                <div class="row-title">${client.name}</div>
+                <div class="row-detail">${client.detail}</div>
+              </div>
+            </div>
+            <span class="status ${statusClass}">${client.status}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function getExpiryDate(daysLeft) {
+      const date = new Date();
+      date.setHours(12, 0, 0, 0);
+      date.setDate(date.getDate() + daysLeft);
+      return date;
+    }
+
+    function renderCheques() {
+      const cheques = dashboardData.cheques;
+      $("#chequeCount").textContent = `${cheques.length} pending`;
+
+      if (!cheques.length) {
+        $("#chequeContent").innerHTML = '<div class="empty-state">There are no pending cheques.</div>';
+        return;
+      }
+
+      const cards = Array.from({ length: Math.min(3, cheques.length) }, (_, i) => {
+        const cheque = cheques[(currentCheque + i) % cheques.length];
+        const date = getExpiryDate(cheque.daysLeft);
+        const day = new Intl.DateTimeFormat(undefined, { day: "2-digit" }).format(date);
+        const month = new Intl.DateTimeFormat(undefined, { month: "short" }).format(date);
+        const weekday = new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(date);
+        const fullDate = new Intl.DateTimeFormat(undefined, { month: "long", day: "numeric", year: "numeric" }).format(date);
+        const countdown = cheque.daysLeft === 0 ? "Expires today"
+          : cheque.daysLeft === 1 ? "1 day left" : `${cheque.daysLeft} days left`;
+
+        // Google Drive thumbnail previews work only when the file is available to the viewer.
+        const driveThumbnail = cheque.driveFileId
+          ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(cheque.driveFileId)}&sz=w800`
+          : "";
+        const previewSource = cheque.previewImageUrl || driveThumbnail;
+
+        return `
+          <article class="cheque-card" aria-label="Pending cheque ${cheque.reference}">
+            <div class="ticket-main">
+              <div class="preview-wrap">
+                <span class="preview-label">Cheque preview</span>
+                <div class="preview-placeholder">
+                  ${icons.document}
+                  <span>Preview appears here when a Drive file is linked</span>
+                </div>
+                <img class="cheque-preview" alt="Preview of cheque ${cheque.reference}" hidden>
+              </div>
+
+              <div class="ticket-details">
+                <div class="ticket-brandline">
+                  <span class="ticket-company">${cheque.company}</span>
+                  <span class="pending-label">Pending</span>
+                </div>
+                <p class="ticket-description">Cheque awaiting processing</p>
+                <div class="ticket-fields">
+                  <div>
+                    <div class="ticket-field-label">Payee</div>
+                    <div class="ticket-field-value">${cheque.payee}</div>
+                  </div>
+                  <div>
+                    <div class="ticket-field-label">Amount</div>
+                    <div class="ticket-field-value">${cheque.amount}</div>
+                  </div>
+                  <div>
+                    <div class="ticket-field-label">Reference</div>
+                    <div class="ticket-field-value">${cheque.reference}</div>
+                  </div>
+                  <div>
+                    <div class="ticket-field-label">Expires</div>
+                    <div class="ticket-field-value">${fullDate}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ticket-expiry">
+                <div class="calendar" aria-label="${weekday}, ${month} ${day}">
+                  <div class="calendar-month">${month}</div>
+                  <div class="calendar-day">${day}</div>
+                  <div class="calendar-weekday">${weekday}</div>
+                </div>
+                <div class="countdown">${countdown}</div>
+              </div>
+            </div>
+
+            <div class="ticket-footer">
+              <div class="barcode-area" aria-hidden="true">
+                <div class="barcode"></div>
+                <span class="barcode-ref">${cheque.reference}</span>
+              </div>
+              <a class="drive-link" href="${cheque.driveUrl}" target="_blank" rel="noopener noreferrer">
+                Open in Google Drive ${icons.external}
+              </a>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      $("#chequeContent").innerHTML = `
+        <div class="deck-area">
+          <div class="deck" id="chequeDeck" aria-live="polite">${cards}</div>
+          <div class="deck-controls">
+            <button class="round-control" id="previousCheque" type="button" aria-label="Previous cheque">${icons.left}</button>
+            <span class="deck-position">${currentCheque + 1} / ${cheques.length}</span>
+            <button class="round-control" id="nextCheque" type="button" aria-label="Next cheque">${icons.right}</button>
+          </div>
+          <p class="swipe-hint">Swipe or use the arrows to browse cheques</p>
+        </div>
+      `;
+
+      // Replace the placeholder with the Drive thumbnail or provided preview image.
+      document.querySelectorAll(".cheque-card").forEach((card, index) => {
+        const cheque = cheques[(currentCheque + index) % cheques.length];
+        const image = card.querySelector(".cheque-preview");
+        const placeholder = card.querySelector(".preview-placeholder");
+        const source = cheque.previewImageUrl || (cheque.driveFileId
+          ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(cheque.driveFileId)}&sz=w800`
+          : "");
+
+        if (source) {
+          image.onload = () => {
+            image.hidden = false;
+            placeholder.hidden = true;
+          };
+          image.onerror = () => {
+            image.hidden = true;
+            placeholder.hidden = false;
+          };
+          image.src = source;
+        }
+      });
+
+      $("#previousCheque").addEventListener("click", () => moveCheque(-1));
+      $("#nextCheque").addEventListener("click", () => moveCheque(1));
+      attachSwipe();
+    }
+
+    function moveCheque(direction) {
+      const count = dashboardData.cheques.length;
+      if (!count) return;
+      currentCheque = (currentCheque + direction + count) % count;
+      renderCheques();
+    }
+
+    function attachSwipe() {
+      const deck = $("#chequeDeck");
+      let startX = 0, startY = 0;
+
+      deck.addEventListener("touchstart", event => {
+        startX = event.changedTouches[0].clientX;
+        startY = event.changedTouches[0].clientY;
+      }, { passive: true });
+
+      deck.addEventListener("touchend", event => {
+        const dx = event.changedTouches[0].clientX - startX;
+        const dy = event.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) moveCheque(dx < 0 ? 1 : -1);
+      }, { passive: true });
+
+      let pointerX = null;
+      deck.addEventListener("pointerdown", event => {
+        if (event.pointerType !== "touch") pointerX = event.clientX;
+      });
+      deck.addEventListener("pointerup", event => {
+        if (pointerX === null) return;
+        const dx = event.clientX - pointerX;
+        if (Math.abs(dx) > 55) moveCheque(dx < 0 ? 1 : -1);
+        pointerX = null;
+      });
+    }
+
+    function updateSearch() {
+      const query = $("#globalSearch").value.trim().toLowerCase();
+      const sections = [...document.querySelectorAll(".searchable-section")];
+      let visibleCount = 0;
+
+      sections.forEach(section => {
+        const items = [...section.querySelectorAll("[data-search]")];
+
+        if (!query) {
+          section.hidden = false;
+          items.forEach(item => item.hidden = false);
+          visibleCount++;
+          return;
+        }
+
+        const titleMatch = section.querySelector("h2")?.textContent.toLowerCase().includes(query);
+        const matchingItems = items.filter(item => item.dataset.search.includes(query));
+        const sectionMatches = Boolean(titleMatch || matchingItems.length);
+
+        section.hidden = !sectionMatches;
+        items.forEach(item => {
+          item.hidden = !titleMatch && !item.dataset.search.includes(query);
+        });
+        if (sectionMatches) visibleCount++;
+      });
+
+      const chequeMatches = dashboardData.cheques.some(item =>
+        `${item.company} ${item.reference} ${item.payee} pending cheque`.toLowerCase().includes(query)
+      );
+      const chequeTitleMatches = "pending cheques".includes(query);
+      $("#chequesSection").hidden = Boolean(query) && !chequeMatches && !chequeTitleMatches;
+      if (!$("#chequesSection").hidden) visibleCount++;
+
+      $("#noResults").style.display = query && visibleCount === 0 ? "block" : "none";
+    }
+
+    function showToast(message) {
+      const toast = $("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2100);
+    }
+
+    $("#todayLabel").textContent = new Intl.DateTimeFormat(undefined, {
+      weekday: "short", month: "short", day: "numeric", year: "numeric"
+    }).format(new Date());
+
+    renderPeople();
+    renderEmployees();
+    renderVehicles();
+    renderClients();
+    renderCheques();
+
+    $("#globalSearch").addEventListener("input", updateSearch);
+    document.querySelectorAll(".placeholder-button").forEach(button => {
+      button.addEventListener("click", () => showToast(`${button.textContent.trim()} — demo screen`));
+    });
+    $("#profileButton").addEventListener("click", () => showToast("Profile menu — demo screen"));
+  </script>
+</body>
+</html>

@@ -1,0 +1,658 @@
+﻿This conversation was generated with Duck.ai (https://duck.ai) using OpenAI's GPT-6 Luna Model. AI chats may display inaccurate or offensive information (see https://duckduckgo.com/duckai/privacy-terms for more info).
+
+====================
+
+User prompt 1 of 1 - 11/11/2026, 10:03:33 AM:
+[Pasted text #1]
+Copy and use this prompt:
+
+```text
+Build a polished, mobile-first company dashboard MVP using only HTML, CSS, and plain JavaScript. Deliver it as one self-contained `index.html` file with embedded CSS and scripts. This is a front-end-only prototype: do not add a backend, database, authentication, build tools, or external frameworks.
+
+## Design direction
+- Create a clean, minimal mobile PWA-style interface for a company.
+- Use a violet-and-white palette, with soft lavender backgrounds, dark readable text, and restrained accent colors.
+- Use rounded cards, subtle shadows, fine borders, comfortable spacing, and clear typography.
+- Make the layout responsive: optimize for phones first, then adapt gracefully to tablet and desktop.
+- Use semantic HTML, accessible color contrast, visible focus states, and large touch-friendly controls.
+- Use simple inline SVG or CSS icons; avoid relying on external image assets or icon libraries.
+
+## Page layout
+
+### 1. Header and global search
+- Show a compact company dashboard header with a greeting or “Company Overview” title and a small profile/avatar control.
+- Place a prominent global search field near the top.
+- Include a search icon and a short placeholder such as “Search employees, vehicles, clients…”.
+- Make search interactive: typing should filter the visible demo items across the relevant sections, or show a small, friendly empty state when there are no matches.
+
+### 2. Company overview counts
+- Add a clearly labeled overview section with four compact statistic cards:
+  - Employees
+  - Present today
+  - Absent today
+  - On leave
+- Use realistic sample counts and make them easy to change in a JavaScript data object.
+- Arrange the cards in a compact two-by-two grid on small screens, with a balanced layout on wider screens.
+- Use a subtle cross-like visual separator between the four metrics, without making it distracting.
+
+### 3. Vehicle details
+- Add a “Vehicles” section with a clear summary of:
+  - Total vehicles
+  - Available vehicles
+  - Active vehicles
+  - Inactive vehicles
+- Use simple cards or a concise status summary with clear labels and distinct but restrained status colors.
+- Include a “View vehicles” link or button as a front-end placeholder.
+
+### 4. Client details
+- Add a “Clients” section with a total client count and a small list or set of client cards.
+- Each client item should show a sample client/company name and a concise status or secondary detail.
+- Include a “View all clients” front-end placeholder control.
+
+### 5. Pending cheques — swipeable ticket stack
+- Add a prominent “Pending cheques” section, styled like a modern digital wallet ticket.
+- Show the cheque cards as a layered, stacked deck. The top cheque should be fully readable, with the next cards slightly offset behind it.
+- Each cheque ticket should have:
+  - **Left/main area:** company name “FACTS,” a “Pending cheque” label, and a link/button labeled “Open in Google Drive.”
+  - Make the Google Drive destination a clearly marked placeholder URL in the JavaScript data, so it can be replaced later. Open it in a new tab.
+  - **Right area:** a compact red calendar-style square showing the cheque expiry day/date and weekday.
+  - A clear countdown such as “5 days left,” calculated from the expiry date using JavaScript.
+- Give the ticket a wallet-pass look: white surface, subtle border/shadow, rounded corners, small perforation/notch details if practical, and a faint divider between the left and right areas.
+- Support touch-friendly swipe gestures on mobile and click/drag or buttons on desktop:
+  - Swipe left/right to move through the cheque stack.
+  - Add small “Previous” and “Next” controls or visible swipe hints so the interaction is discoverable.
+  - Animate card movement smoothly.
+  - When a card is dismissed or moved, bring the next ticket to the front.
+- Include several realistic demo cheque records with different expiry dates so the stack can be tested.
+- Show a helpful empty state if there are no pending cheques.
+
+## Interaction and implementation
+- Use plain JavaScript for search filtering, cheque countdowns, and swipe/next/previous interactions.
+- Keep demo content in a small, clearly organized JavaScript data object or array near the bottom of the file.
+- Add lightweight click feedback for buttons and cards. Use placeholder behavior for controls that would normally navigate to other screens.
+- Ensure the page works by opening `index.html` directly in a browser, without a server or external dependencies.
+- Add brief code comments showing where to replace sample counts, client/vehicle data, and Google Drive links.
+- Keep the code readable and well structured. Return the complete HTML file only, inside one code block.
+```
+[End of pasted text #1]
+
+make a demo html css based mvp setup, html file to share a quick view of what this app will look like.
+
+
+GPT-6 Luna:
+<!--  -->
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ff">
+  <title>FACTS — Company Overview</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #211d31;
+      --muted: #777287;
+      --line: #ece9f4;
+      --purple: #7355d9;
+      --purple-dark: #5c40c4;
+      --lavender: #f3f0ff;
+      --green: #25865e;
+      --green-bg: #eaf7ef;
+      --amber: #a66b10;
+      --amber-bg: #fff4df;
+      --red: #c94b59;
+      --red-bg: #fff0f1;
+      --card-shadow: 0 8px 28px rgba(47, 35, 91, .055);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: #fbfaff;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, a:focus-visible, input:focus-visible {
+      outline: 3px solid rgba(115, 85, 217, .35);
+      outline-offset: 3px;
+    }
+
+    .app-shell { max-width: 1180px; margin: 0 auto; padding: 26px 28px 52px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 27px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      display: grid; place-items: center; width: 42px; height: 42px;
+      border-radius: 14px; color: white; background: var(--purple);
+      box-shadow: 0 6px 14px rgba(115, 85, 217, .25);
+    }
+    .brand-mark svg { width: 23px; height: 23px; }
+    .brand-name { font-size: 15px; font-weight: 750; letter-spacing: .09em; }
+    .brand-caption { margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .profile-button {
+      display: flex; align-items: center; gap: 10px; padding: 6px 10px 6px 6px;
+      border: 1px solid var(--line); border-radius: 999px; background: white; cursor: pointer;
+    }
+    .avatar {
+      display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+      color: #5c40c4; background: #eee8ff; font-size: 12px; font-weight: 750;
+    }
+    .profile-name { font-size: 13px; font-weight: 650; }
+    .profile-chevron { width: 14px; color: var(--muted); }
+
+    .welcome-row { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 22px; }
+    h1 { margin: 0; font-size: clamp(25px, 4vw, 34px); letter-spacing: -.04em; }
+    .welcome-copy { margin: 7px 0 0; color: var(--muted); font-size: 14px; }
+    .date-chip { padding: 9px 13px; border: 1px solid var(--line); border-radius: 12px; color: #5c5870; background: white; font-size: 12px; white-space: nowrap; }
+
+    .search-wrap { position: relative; margin-bottom: 27px; }
+    .search-icon { position: absolute; top: 50%; left: 16px; width: 19px; height: 19px; color: #908aa3; transform: translateY(-50%); pointer-events: none; }
+    .search-input {
+      width: 100%; height: 52px; padding: 0 18px 0 48px; border: 1px solid #e8e4f0;
+      border-radius: 15px; color: var(--ink); background: white; box-shadow: 0 4px 14px rgba(47, 35, 91, .03);
+    }
+    .search-input::placeholder { color: #9a95a8; }
+    .search-input:focus { border-color: #b8a8f0; outline: none; box-shadow: 0 0 0 4px rgba(115,85,217,.1); }
+
+    .section { margin-top: 28px; }
+    .section-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .section-heading h2 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+    .section-note { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .text-button {
+      padding: 7px 0; border: 0; color: var(--purple-dark); background: transparent;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .text-button:hover { color: #3f299c; }
+
+    .stats-grid {
+      position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    }
+    .stat-card {
+      position: relative; min-height: 118px; padding: 17px; border: 1px solid var(--line);
+      border-radius: 16px; background: white; box-shadow: var(--card-shadow);
+    }
+    .stat-label { color: var(--muted); font-size: 12px; font-weight: 550; }
+    .stat-value { margin-top: 12px; font-size: 29px; font-weight: 750; letter-spacing: -.05em; }
+    .stat-meta { display: flex; align-items: center; gap: 5px; margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .stat-icon {
+      position: absolute; top: 14px; right: 14px; display: grid; place-items: center;
+      width: 32px; height: 32px; border-radius: 10px; color: var(--purple); background: var(--lavender);
+    }
+    .stat-icon svg { width: 17px; height: 17px; }
+    .stat-card:not(:last-child)::after {
+      content: ""; position: absolute; z-index: 1; top: 50%; right: -7px;
+      width: 13px; height: 13px; border: 3px solid #fbfaff; border-radius: 50%;
+      background: #d9d2ef; transform: translateY(-50%);
+    }
+
+    .lower-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: stretch; }
+    .panel { min-width: 0; padding: 19px; border: 1px solid var(--line); border-radius: 18px; background: white; box-shadow: var(--card-shadow); }
+    .panel .section-heading { margin-bottom: 15px; }
+    .vehicle-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .vehicle-metric { padding: 12px 10px; border-radius: 12px; background: #faf9fd; }
+    .vehicle-metric strong { display: block; font-size: 20px; letter-spacing: -.03em; }
+    .vehicle-metric span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .vehicle-list { display: grid; gap: 9px; margin-top: 16px; }
+    .list-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .row-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .item-icon { display: grid; flex: 0 0 auto; place-items: center; width: 34px; height: 34px; border-radius: 11px; color: #6650bd; background: #f1edff; }
+    .item-icon svg { width: 17px; height: 17px; }
+    .row-title { overflow: hidden; font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+    .row-subtitle { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .status { padding: 5px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .status.available, .status.active, .status.current { color: var(--green); background: var(--green-bg); }
+    .status.in-use { color: var(--purple-dark); background: var(--lavender); }
+    .status.inactive, .status.review { color: var(--amber); background: var(--amber-bg); }
+
+    .client-total { display: flex; align-items: baseline; gap: 8px; margin: 0 0 13px; }
+    .client-total strong { font-size: 27px; letter-spacing: -.04em; }
+    .client-total span { color: var(--muted); font-size: 12px; }
+    .client-list { display: grid; gap: 10px; }
+    .client-avatar { display: grid; flex: 0 0 auto; place-items: center; width: 34px; height: 34px; border-radius: 11px; color: #6852bb; background: #f1edff; font-size: 11px; font-weight: 750; }
+
+    .cheque-section { margin-top: 28px; }
+    .cheque-section .section-heading { margin-bottom: 12px; }
+    .deck-area { position: relative; max-width: 780px; margin: 0 auto; padding: 0 12px 11px; }
+    .deck { position: relative; height: 220px; touch-action: pan-y; }
+    .cheque-card {
+      position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 148px;
+      overflow: hidden; min-width: 0; border: 1px solid #ebe7f0; border-radius: 18px;
+      background: white; box-shadow: 0 12px 30px rgba(37, 29, 66, .12);
+      transition: transform .34s ease, opacity .34s ease, box-shadow .2s ease;
+      user-select: none;
+    }
+    .cheque-card:nth-child(2) { transform: translateY(8px) scale(.975); z-index: -1; background: #f5f2fd; }
+    .cheque-card:nth-child(3) { transform: translateY(15px) scale(.95); z-index: -2; background: #ece8f8; }
+    .cheque-main { position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 24px 30px; }
+    .cheque-main::after {
+      content: ""; position: absolute; top: 13px; right: -7px; bottom: 13px;
+      border-right: 1px dashed #d9d4e3;
+    }
+    .eyebrow { color: #8a8497; font-size: 10px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .cheque-company { margin: 6px 0 4px; font-size: 21px; font-weight: 800; letter-spacing: .08em; }
+    .cheque-subtitle { color: var(--muted); font-size: 12px; }
+    .drive-link {
+      display: inline-flex; align-items: center; gap: 7px; margin-top: 17px; padding: 9px 12px;
+      border: 1px solid #e6e0f5; border-radius: 10px; color: var(--purple-dark);
+      background: #faf9ff; font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer;
+    }
+    .drive-link:hover { background: #f0ecff; }
+    .drive-link svg { width: 14px; height: 14px; }
+    .cheque-date-area { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; padding: 16px; background: #fcfbfe; }
+    .calendar {
+      width: 67px; overflow: hidden; border: 1px solid #f0d7da; border-radius: 12px;
+      background: white; text-align: center; box-shadow: 0 4px 12px rgba(40, 20, 30, .06);
+    }
+    .calendar-month { padding: 5px; color: white; background: var(--red); font-size: 9px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    .calendar-day { padding-top: 4px; color: #393342; font-size: 25px; font-weight: 800; line-height: 1.1; }
+    .calendar-weekday { padding: 2px 0 7px; color: #777182; font-size: 9px; font-weight: 650; }
+    .countdown { color: var(--red); font-size: 11px; font-weight: 750; text-align: center; }
+    .deck-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 16px; }
+    .round-control {
+      display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line);
+      border-radius: 50%; color: #514b61; background: white; cursor: pointer; transition: .18s ease;
+    }
+    .round-control:hover { color: var(--purple-dark); border-color: #d4c9f7; background: #f6f3ff; }
+    .round-control svg { width: 16px; height: 16px; }
+    .deck-position { min-width: 46px; color: var(--muted); font-size: 11px; text-align: center; }
+    .swipe-hint { margin: 9px 0 0; color: #9690a2; font-size: 11px; text-align: center; }
+
+    .empty-state { padding: 22px 14px; border: 1px dashed #ded9e9; border-radius: 13px; color: var(--muted); font-size: 12px; text-align: center; }
+    .no-results { display: none; padding: 22px 14px; border: 1px dashed #ded9e9; border-radius: 14px; color: var(--muted); background: white; font-size: 13px; text-align: center; }
+    .clickable { transition: transform .15s ease, box-shadow .15s ease; }
+    .clickable:active { transform: scale(.985); }
+    .toast {
+      position: fixed; z-index: 10; right: 20px; bottom: 20px; padding: 12px 16px;
+      border-radius: 12px; color: white; background: #302a40; box-shadow: 0 8px 24px rgba(24,18,39,.2);
+      font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 760px) {
+      .app-shell { padding: 20px 18px 40px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-card:nth-child(2)::after { display: none; }
+      .stat-card:nth-child(3)::after { display: block; }
+      .lower-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .app-shell { padding: 17px 14px 34px; }
+      .profile-name, .profile-chevron { display: none; }
+      .welcome-row { align-items: flex-start; }
+      .date-chip { padding: 8px 9px; font-size: 10px; }
+      .stat-card { min-height: 108px; padding: 14px; }
+      .stat-value { margin-top: 13px; font-size: 26px; }
+      .stat-icon { top: 11px; right: 11px; width: 29px; height: 29px; }
+      .panel { padding: 16px; }
+      .vehicle-summary { grid-template-columns: repeat(2, 1fr); }
+      .cheque-card { grid-template-columns: 1fr 104px; }
+      .cheque-main { padding: 18px 16px; }
+      .cheque-company { font-size: 18px; }
+      .cheque-date-area { padding: 12px 8px; }
+      .drive-link { gap: 5px; padding: 8px 9px; font-size: 10px; }
+      .deck { height: 215px; }
+      .section-heading h2 { font-size: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="FACTS company dashboard">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5h14M5 12h9M5 17.5h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="12" r="2" fill="currentColor"/></svg>
+        </div>
+        <div>
+          <div class="brand-name">FACTS</div>
+          <div class="brand-caption">Company dashboard</div>
+        </div>
+      </div>
+      <button class="profile-button clickable" id="profileButton" type="button" aria-label="Open profile menu">
+        <span class="avatar">JD</span>
+        <span class="profile-name">Jordan Davis</span>
+        <svg class="profile-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7.5 5 5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </header>
+
+    <section aria-labelledby="page-title">
+      <div class="welcome-row">
+        <div>
+          <h1 id="page-title">Company Overview</h1>
+          <p class="welcome-copy">Here’s what’s happening across your company today.</p>
+        </div>
+        <div class="date-chip" id="todayLabel" aria-label="Today's date"></div>
+      </div>
+
+      <label class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input class="search-input" id="globalSearch" type="search" placeholder="Search employees, vehicles, clients…" autocomplete="off" aria-label="Search employees, vehicles, clients, and cheques">
+      </label>
+    </section>
+
+    <div class="no-results" id="noResults" role="status">No matches found. Try another search.</div>
+
+    <section class="section searchable-section" id="overviewSection" aria-labelledby="overview-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="overview-title">People overview</h2>
+          <p class="section-note">A quick look at today’s attendance</p>
+        </div>
+        <button class="text-button placeholder-button" type="button">View attendance</button>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+    </section>
+
+    <div class="section lower-grid">
+      <section class="panel searchable-section" id="vehiclesSection" aria-labelledby="vehicles-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="vehicles-title">Vehicles</h2>
+            <p class="section-note">Fleet status at a glance</p>
+          </div>
+          <button class="text-button placeholder-button" type="button">View vehicles</button>
+        </div>
+        <div class="vehicle-summary" id="vehicleSummary"></div>
+        <div class="vehicle-list" id="vehicleList"></div>
+      </section>
+
+      <section class="panel searchable-section" id="clientsSection" aria-labelledby="clients-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="clients-title">Clients</h2>
+            <p class="section-note">Your client relationships</p>
+          </div>
+          <button class="text-button placeholder-button" type="button">View all clients</button>
+        </div>
+        <div class="client-total"><strong id="clientCount"></strong><span>total clients</span></div>
+        <div class="client-list" id="clientList"></div>
+      </section>
+    </div>
+
+    <section class="cheque-section searchable-section" id="chequesSection" aria-labelledby="cheques-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="cheques-title">Pending cheques</h2>
+          <p class="section-note">Keep an eye on upcoming expiry dates</p>
+        </div>
+        <span class="status review" id="chequeCount"></span>
+      </div>
+      <div id="chequeContent"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Edit the sample counts, clients, vehicles, and cheque records here.
+    // Replace each Google Drive placeholder URL with its real destination.
+    const dashboardData = {
+      people: [
+        { label: "Employees", value: 48, detail: "Across all teams", icon: "people" },
+        { label: "Present today", value: 41, detail: "85% of employees", icon: "check" },
+        { label: "Absent today", value: 3, detail: "Needs follow-up", icon: "absent" },
+        { label: "On leave", value: 4, detail: "Approved leave", icon: "leave" }
+      ],
+      vehicles: [
+        { name: "Van 01", detail: "Toyota HiAce · FCT-204", status: "Available", category: "available" },
+        { name: "Sedan 03", detail: "Honda Accord · FCT-118", status: "In use", category: "in-use" },
+        { name: "Truck 02", detail: "Ford Transit · FCT-331", status: "In use", category: "in-use" },
+        { name: "Van 04", detail: "Nissan NV200 · FCT-087", status: "Inactive", category: "inactive" }
+      ],
+      clients: [
+        { name: "Northstar Logistics", detail: "Operations · Since 2022", status: "Active", initials: "NL" },
+        { name: "Evergreen Group", detail: "Facilities · Since 2023", status: "Active", initials: "EG" },
+        { name: "Blue Peak Partners", detail: "Consulting · Since 2024", status: "In review", initials: "BP" }
+      ],
+      cheques: [
+        { company: "FACTS", expiryInDays: 5, reference: "CHQ-2048", driveUrl: "https://drive.google.com/drive/u/0/my-drive" },
+        { company: "FACTS", expiryInDays: 12, reference: "CHQ-2051", driveUrl: "https://drive.google.com/drive/u/0/my-drive" },
+        { company: "FACTS", expiryInDays: 19, reference: "CHQ-2057", driveUrl: "https://drive.google.com/drive/u/0/my-drive" }
+      ]
+    };
+
+    const icons = {
+      people: '<svg viewBox="0 0 24 24" fill="none"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM16 3.2a4 4 0 0 1 0 7.7M17 14.5a4 4 0 0 1 4 4V20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+      check: '<svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.2 4.2L19.5 6.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg>',
+      absent: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 15.5c.9-1 2.1-1.5 3.5-1.5s2.6.5 3.5 1.5M9 9h.01M15 9h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+      leave: '<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+      vehicle: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 14.5 5 8h14l2 6.5v4h-2.5v-2h-13v2H3v-4ZM5 14.5h14M7 11h.01M17 11h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      external: '<svg viewBox="0 0 24 24" fill="none"><path d="M14 5h5v5M19 5l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+      left: '<svg viewBox="0 0 24 24" fill="none"><path d="m14.5 5-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      right: '<svg viewBox="0 0 24 24" fill="none"><path d="m9.5 5 7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    };
+
+    const statsGrid = document.getElementById("statsGrid");
+    const vehicleSummary = document.getElementById("vehicleSummary");
+    const vehicleList = document.getElementById("vehicleList");
+    const clientList = document.getElementById("clientList");
+    const chequeContent = document.getElementById("chequeContent");
+    const searchInput = document.getElementById("globalSearch");
+    const noResults = document.getElementById("noResults");
+    let currentCheque = 0;
+    let toastTimer;
+
+    function renderPeople() {
+      statsGrid.innerHTML = dashboardData.people.map(item => `
+        <article class="stat-card clickable" data-search="${item.label.toLowerCase()}">
+          <div class="stat-icon" aria-hidden="true">${icons[item.icon]}</div>
+          <div class="stat-label">${item.label}</div>
+          <div class="stat-value">${item.value}</div>
+          <div class="stat-meta">${item.detail}</div>
+        </article>
+      `).join("");
+    }
+
+    function renderVehicles() {
+      const total = dashboardData.vehicles.length;
+      const available = dashboardData.vehicles.filter(v => v.category === "available").length;
+      const active = dashboardData.vehicles.filter(v => v.category === "in-use").length;
+      const inactive = dashboardData.vehicles.filter(v => v.category === "inactive").length;
+      const metrics = [
+        ["Total", total], ["Available", available], ["Active", active], ["Inactive", inactive]
+      ];
+      vehicleSummary.innerHTML = metrics.map(([label, value]) =>
+        `<div class="vehicle-metric"><strong>${value}</strong><span>${label}</span></div>`
+      ).join("");
+      vehicleList.innerHTML = dashboardData.vehicles.map(vehicle => `
+        <div class="list-row vehicle-item" data-search="${(vehicle.name + " " + vehicle.detail + " " + vehicle.status).toLowerCase()}">
+          <div class="row-main">
+            <div class="item-icon" aria-hidden="true">${icons.vehicle}</div>
+            <div>
+              <div class="row-title">${vehicle.name}</div>
+              <div class="row-subtitle">${vehicle.detail}</div>
+            </div>
+          </div>
+          <span class="status ${vehicle.category}">${vehicle.status}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderClients() {
+      document.getElementById("clientCount").textContent = "12";
+      clientList.innerHTML = dashboardData.clients.map(client => {
+        const statusClass = client.status === "Active" ? "active" : "review";
+        return `
+          <div class="list-row client-item" data-search="${(client.name + " " + client.detail + " " + client.status).toLowerCase()}">
+            <div class="row-main">
+              <div class="client-avatar" aria-hidden="true">${client.initials}</div>
+              <div>
+                <div class="row-title">${client.name}</div>
+                <div class="row-subtitle">${client.detail}</div>
+              </div>
+            </div>
+            <span class="status ${statusClass}">${client.status}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function dateForOffset(days) {
+      const date = new Date();
+      date.setHours(12, 0, 0, 0);
+      date.setDate(date.getDate() + days);
+      return date;
+    }
+
+    function formatDate(date, options) {
+      return new Intl.DateTimeFormat(undefined, options).format(date);
+    }
+
+    function renderCheques() {
+      const cheques = dashboardData.cheques;
+      document.getElementById("chequeCount").textContent = `${cheques.length} pending`;
+      if (!cheques.length) {
+        chequeContent.innerHTML = '<div class="empty-state">You’re all caught up — there are no pending cheques.</div>';
+        return;
+      }
+
+      const visible = Array.from({ length: Math.min(3, cheques.length) }, (_, i) => {
+        return cheques[(currentCheque + i) % cheques.length];
+      });
+      const cards = visible.map((cheque, index) => {
+        const expiry = dateForOffset(cheque.expiryInDays);
+        const day = formatDate(expiry, { day: "2-digit" });
+        const month = formatDate(expiry, { month: "short" });
+        const weekday = formatDate(expiry, { weekday: "short" });
+        const countdown = cheque.expiryInDays === 0 ? "Expires today"
+          : cheque.expiryInDays === 1 ? "1 day left"
+          : `${cheque.expiryInDays} days left`;
+        return `
+          <article class="cheque-card" data-index="${index}" aria-label="Pending cheque ${cheque.reference}">
+            <div class="cheque-main">
+              <div class="eyebrow">Cheque ${cheque.reference}</div>
+              <div class="cheque-company">${cheque.company}</div>
+              <div class="cheque-subtitle">Pending cheque · Expiry ${formatDate(expiry, { month: "long", day: "numeric" })}</div>
+              <a class="drive-link" href="${cheque.driveUrl}" target="_blank" rel="noopener noreferrer">
+                Open in Google Drive ${icons.external}
+              </a>
+            </div>
+            <div class="cheque-date-area">
+              <div class="calendar" aria-label="${weekday}, ${month} ${day}">
+                <div class="calendar-month">${month}</div>
+                <div class="calendar-day">${day}</div>
+                <div class="calendar-weekday">${weekday}</div>
+              </div>
+              <div class="countdown">${countdown}</div>
+            </div>
+          </article>`;
+      }).join("");
+
+      chequeContent.innerHTML = `
+        <div class="deck-area">
+          <div class="deck" id="chequeDeck" aria-live="polite">${cards}</div>
+          <div class="deck-controls">
+            <button class="round-control" type="button" id="previousCheque" aria-label="Previous cheque">${icons.left}</button>
+            <span class="deck-position">${currentCheque + 1} / ${cheques.length}</span>
+            <button class="round-control" type="button" id="nextCheque" aria-label="Next cheque">${icons.right}</button>
+          </div>
+          <p class="swipe-hint">Swipe or use the arrows to browse cheques</p>
+        </div>`;
+
+      document.getElementById("previousCheque").addEventListener("click", () => moveCheque(-1));
+      document.getElementById("nextCheque").addEventListener("click", () => moveCheque(1));
+      attachSwipe();
+    }
+
+    function moveCheque(direction) {
+      const count = dashboardData.cheques.length;
+      if (!count) return;
+      currentCheque = (currentCheque + direction + count) % count;
+      renderCheques();
+    }
+
+    function attachSwipe() {
+      const deck = document.getElementById("chequeDeck");
+      if (!deck) return;
+      let startX = 0;
+      let startY = 0;
+      deck.addEventListener("touchstart", event => {
+        startX = event.changedTouches[0].clientX;
+        startY = event.changedTouches[0].clientY;
+      }, { passive: true });
+      deck.addEventListener("touchend", event => {
+        const dx = event.changedTouches[0].clientX - startX;
+        const dy = event.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) moveCheque(dx < 0 ? 1 : -1);
+      }, { passive: true });
+
+      let pointerStart = null;
+      deck.addEventListener("pointerdown", event => {
+        if (event.pointerType === "touch") return;
+        pointerStart = event.clientX;
+      });
+      deck.addEventListener("pointerup", event => {
+        if (pointerStart === null) return;
+        const dx = event.clientX - pointerStart;
+        if (Math.abs(dx) > 55) moveCheque(dx < 0 ? 1 : -1);
+        pointerStart = null;
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function updateSearch() {
+      const query = searchInput.value.trim().toLowerCase();
+      const sections = [...document.querySelectorAll(".searchable-section")];
+      let matchedSections = 0;
+
+      sections.forEach(section => {
+        const items = [...section.querySelectorAll("[data-search]")];
+        if (!query) {
+          section.hidden = false;
+          items.forEach(item => item.hidden = false);
+          matchedSections++;
+          return;
+        }
+        const matchingItems = items.filter(item => item.dataset.search.includes(query));
+        const sectionTextMatch = section.querySelector("h2")?.textContent.toLowerCase().includes(query);
+        const visible = matchingItems.length > 0 || sectionTextMatch;
+        section.hidden = !visible;
+        items.forEach(item => item.hidden = !item.dataset.search.includes(query) && !sectionTextMatch);
+        if (visible) matchedSections++;
+      });
+
+      // Cheques have their own search matching, while preserving the active deck.
+      const chequeSection = document.getElementById("chequesSection");
+      if (query) {
+        const matches = dashboardData.cheques.filter(item =>
+          `${item.company} ${item.reference} pending cheque`.toLowerCase().includes(query)
+        );
+        chequeSection.hidden = matches.length === 0 && !"pending cheques".includes(query);
+        if (!chequeSection.hidden) matchedSections++;
+      } else {
+        chequeSection.hidden = false;
+      }
+
+      noResults.style.display = query && matchedSections === 0 ? "block" : "none";
+    }
+
+    document.getElementById("todayLabel").textContent = formatDate(new Date(), {
+      weekday: "short", month: "short", day: "numeric", year: "numeric"
+    });
+    renderPeople();
+    renderVehicles();
+    renderClients();
+    renderCheques();
+
+    searchInput.addEventListener("input", updateSearch);
+    document.querySelectorAll(".placeholder-button").forEach(button => {
+      button.addEventListener("click", () => showToast(`${button.textContent.trim()} — demo view coming soon`));
+    });
+    document.getElementById("profileButton").addEventListener("click", () => showToast("Profile menu — demo view"));
+  </script>
+</body>
+</html>
+```
